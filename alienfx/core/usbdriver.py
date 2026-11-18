@@ -2,7 +2,7 @@
 # usbdriver.py
 #
 # Copyright (C) 2013-2014 Ashwin Menon <ashwin.menon@gmail.com>
-# Copyright (C) 2015-2026 Track Master Steve <trackmastersteve@gmail.com>
+# Copyright (C) 2015-2024 Track Master Steve <trackmastersteve@gmail.com>
 #
 # Alienfx is free software.
 #
@@ -29,6 +29,8 @@ This module provides the following classes:
 AlienFXUSBDriver: low level USB communication API with an AlienFX controller.
 """
 
+from builtins import hex
+from builtins import object
 import logging
 
 import usb
@@ -49,6 +51,7 @@ class AlienFXUSBDriver(object):
     IN_B_REQUEST = 0x01 # bRequest = Clear Feature
     IN_W_VALUE = 0x101
     IN_W_INDEX = 0x0
+    USB_TIMEOUT_MS = 1000
         
     def __init__(self, controller):
         self._control_taken = False
@@ -58,28 +61,21 @@ class AlienFXUSBDriver(object):
     def write_packet(self, pkt):
         """ Write the given packet over USB to the AlienFX controller."""
         if not self._control_taken:
-            return
-        try:
-            self._dev.ctrl_transfer(
-                self.OUT_BM_REQUEST_TYPE, 
-                self.OUT_B_REQUEST, self.OUT_W_VALUE, 
-                self.OUT_W_INDEX, pkt, 0)
-        except USBError as exc:
-            logging.error("write_packet: {}".format(exc))
+            raise RuntimeError("USB controller is not acquired")
+        self._dev.ctrl_transfer(
+            self.OUT_BM_REQUEST_TYPE,
+            self.OUT_B_REQUEST, self.OUT_W_VALUE,
+            self.OUT_W_INDEX, pkt, self.USB_TIMEOUT_MS)
             
     def read_packet(self):
         """ Read a packet over USB from the AlienFX controller and return it."""
         if not self._control_taken:
-            logging.error("read_packet: control not taken...")
-            return
-        try:
-            pkt = self._dev.ctrl_transfer(
-                self.IN_BM_REQUEST_TYPE, 
-                self.IN_B_REQUEST, self.IN_W_VALUE, 
-                self.IN_W_INDEX, self._controller.cmd_packet.PACKET_LENGTH, 0)
-            return pkt
-        except USBError as exc:
-            logging.error("read_packet: {}".format(exc))
+            raise RuntimeError("USB controller is not acquired")
+        return self._dev.ctrl_transfer(
+            self.IN_BM_REQUEST_TYPE,
+            self.IN_B_REQUEST, self.IN_W_VALUE,
+            self.IN_W_INDEX, self._controller.cmd_packet.PACKET_LENGTH,
+            self.USB_TIMEOUT_MS)
 
         
     def acquire(self):
@@ -90,25 +86,25 @@ class AlienFXUSBDriver(object):
             idVendor=self._controller.vendor_id, 
             idProduct=self._controller.product_id)
         if (self._dev is None):
-            msg = "ERROR: No AlienFX USB controller found; tried "
-            msg += "VID {}".format(self._controller.vendor_id)
-            msg += ", PID {}".format(self._controller.product_id)
-            logging.error(msg)
+            raise RuntimeError(
+                "No AlienFX USB controller found; tried VID {}, PID {}".format(
+                    self._controller.vendor_id,
+                    self._controller.product_id,
+                )
+            )
         try:
             self._dev.detach_kernel_driver(0)
         except USBError as exc: 
+            if getattr(exc, "errno", None) == 13:
+                raise
             logging.error(
                 "Cant detach kernel driver. Error : {}".format(exc.strerror))
         try:
             self._dev.set_configuration()
-        except USBError as exc: 
-            logging.error(
-                "Cant set configuration. Error : {}".format(exc.strerror))
-        try:
             usb.util.claim_interface(self._dev, 0)
-        except USBError as exc: 
-            logging.error(
-                "Cant claim interface. Error : {}".format(exc.strerror))
+        except USBError:
+            self._dev = None
+            raise
         self._control_taken = True
         logging.debug("USB device acquired, VID={}, PID={}".format(
             hex(self._controller.vendor_id), hex(self._controller.product_id)))

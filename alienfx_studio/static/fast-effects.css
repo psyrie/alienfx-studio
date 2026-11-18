@@ -1,0 +1,57 @@
+.preset-card.preview-active[data-effect="comet"] .preset-art::before {
+  animation: art-drift var(--motion-duration, 1.6s) ease-in-out infinite alternate;
+}
+
+.preview-stage[data-effect="comet"] .preview-halo {
+  animation: comet-flow var(--motion-duration, 1.6s) ease-in-out infinite alternate;
+}
+
+.preset-card.preview-active[data-effect="blink"] .preset-art::before,
+.preview-stage[data-effect="blink"] .keyboard-row i {
+  animation: pulse-recipe 2.3s ease-in-out infinite;
+}
+
+@keyframes comet-flow {
+  from { transform: translateX(-24px) scale(.8); }
+  to { transform: translateX(24px) scale(1.15); }
+}
+
+.preset-card.preview-active[data-effect="orbit"] .preset-art::before,
+.preview-stage[data-effect="orbit"] .preview-halo {
+  animation: orbit-flow var(--motion-duration, 2s) ease-in-out infinite alternate;
+}
+
+.preset-card.preview-active[data-effect="prism"] .preset-art::before,
+.preview-stage[data-effect="prism"] .keyboard-row i {
+  animation: prism-glide var(--motion-duration, 2s) ease-in-out infinite alternate;
+}
+
+.preset-card.preview-active[data-effect="polyphase"] .preset-art::before,
+.preview-stage[data-effect="polyphase"] .preview-halo {
+  animation: polyphase-drift var(--motion-duration, 2s) ease-in-out infinite;
+}
+
+@keyframes orbit-flow {
+  from { opacity: .55; filter: hue-rotate(-35deg) saturate(.9); }
+  to { opacity: 1; filter: hue-rotate(35deg) saturate(1.2); }
+}
+
+@keyframes prism-glide {
+  from { opacity: .55; filter: hue-rotate(0deg) brightness(.8); }
+  to { opacity: 1; filter: hue-rotate(80deg) brightness(1.15); }
+}
+
+@keyframes polyphase-drift {
+  0%, 100% { opacity: .55; filter: hue-rotate(0deg); }
+  50% { opacity: 1; filter: hue-rotate(110deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-stage[data-effect="blink"] .keyboard-row i,
+  .preview-stage[data-effect="comet"] .preview-halo,
+  .preview-stage[data-effect="orbit"] .preview-halo,
+  .preview-stage[data-effect="prism"] .keyboard-row i,
+  .preview-stage[data-effect="polyphase"] .preview-halo {
+    animation: none !important;
+  }
+}

@@ -2,7 +2,7 @@
 # action_renderer.py
 #
 # Copyright (C) 2013-2014 Ashwin Menon <ashwin.menon@gmail.com>
-# Copyright (C) 2015-2026 Track Master Steve <trackmastersteve@gmail.com>
+# Copyright (C) 2015-2024 Track Master Steve <trackmastersteve@gmail.com>
 #
 # Alienfx is free software.
 #
@@ -32,7 +32,6 @@ Gtk.TreeView.
 """
 
 
-"""Compatibility: avoid dependency on `past` by using native division."""
 import cairo
 
 import gi
@@ -73,7 +72,7 @@ class AlienFXActionCellRenderer(Gtk.CellRenderer):
         prop = GObject.Value()
         prop.init(GObject.TYPE_INT)
         treeview.style_get_property("horizontal-separator", prop)
-        self.cell_padding = prop.get_int() / 2
+        self.cell_padding = prop.get_int() // 2
         treeview.style_get_property("grid-line-width", prop)
         self.cell_padding += prop.get_int()
         self.selected_action = None
@@ -81,8 +80,8 @@ class AlienFXActionCellRenderer(Gtk.CellRenderer):
         
     def _convert_x_to_action_index(self, x):
         """ Convert the given x coordinate to an action index. """
-        return int((x - self.cell_padding - 1) /
-            (self.item_width + self.item_spacing + self.line_width))
+        return (x - self.cell_padding - 1) // (
+            self.item_width + self.item_spacing + self.line_width)
         
     def select_action_at_index(self, index):
         """ Select the action at the given index. """
@@ -120,11 +119,10 @@ class AlienFXActionCellRenderer(Gtk.CellRenderer):
         # Draw the actions.
         actions = self.get_property("actions").actions
         start_x = cell_area.x + self.item_spacing
-        start_y = cell_area.y + (cell_area.height - self.item_height) / 2
+        start_y = cell_area.y + (cell_area.height - self.item_height) // 2
         action_num = 0
         for action in actions:
             action_type = AlienFXThemeFile.get_action_type(action)
-            border_colour = self.border_normal + (0.8,)
             if action_type == AlienFXThemeFile.KW_ACTION_TYPE_FIXED:
                 colours = AlienFXThemeFile.get_action_colours(action)
                 if len(colours) == 1:
@@ -147,12 +145,12 @@ class AlienFXActionCellRenderer(Gtk.CellRenderer):
                     border_colour = self.border_selected_light
                     (red, green, blue) = colours_normalized
                     cr.rectangle(
-                        start_x, start_y, self.item_width / 2, self.item_height)
+                        start_x, start_y, self.item_width // 2, self.item_height)
                     cr.set_source_rgb(red, green, blue)
                     cr.fill()
                     cr.rectangle(
-                        start_x + (self.item_width / 2), start_y, 
-                        self.item_width / 2, self.item_height)
+                        start_x + self.item_width // 2, start_y,
+                        self.item_width // 2, self.item_height)
                     cr.set_source_rgb(0, 0, 0)
                     cr.fill()
             elif action_type == AlienFXThemeFile.KW_ACTION_TYPE_MORPH:

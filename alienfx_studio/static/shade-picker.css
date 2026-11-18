@@ -1,0 +1,14 @@
+.color-pickers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 47px));
+  gap: 10px 12px;
+  justify-content: start;
+}
+
+@media (max-width: 760px) {
+  .color-pickers {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    max-width: 290px;
+  }
+}

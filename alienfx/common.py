@@ -2,7 +2,7 @@
 # common.py
 #
 # Copyright (C) 2013-2014 Ashwin Menon <ashwin.menon@gmail.com>
-# Copyright (C) 2015-2026 Track Master Steve <trackmastersteve@gmail.com>
+# Copyright (C) 2015-2024 Track Master Steve <trackmastersteve@gmail.com>
 #
 # Alienfx is free software.
 #
@@ -29,8 +29,8 @@ from importlib.metadata import PackageNotFoundError, version
 
 def get_version():
     """ Returns the version of the installed alienfx package."""
-
+    
     try:
         return version("alienfx")
     except PackageNotFoundError:
-        return "2.5.0"
+        return "2.4.3"

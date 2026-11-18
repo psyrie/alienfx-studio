@@ -1,0 +1,40 @@
+.effect-filter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #77798e;
+  font: 8px var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.effect-filter select {
+  min-width: 138px;
+  height: 35px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #11121b;
+  color: var(--ink);
+  font: 10px var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.effect-filter select:focus-visible {
+  outline: 2px solid #a88bff88;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .effect-filter {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .effect-filter select {
+    flex: 1;
+  }
+}

@@ -1,0 +1,9 @@
+.preset-card:not(.preview-active) .preset-art::before {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preset-card .preset-art::before {
+    animation: none !important;
+  }
+}

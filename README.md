@@ -1,106 +1,99 @@
+# AlienFX Studio
 
-AlienFX is a Linux utility to control the lighting effects of your Alienware computer.
-============
+A local Flask interface for AlienFX lighting. The supported USB controller
+implementation and its bundled data live in this project under `alienfx/`;
+the studio does not replace or install over the legacy GTK application.
 
-At present there is a CLI version (``alienfx``) and a gtk GUI version (``alienfx-gtk``). And 
-has been tested on Debian/Ubuntu/Kali/Mint, Fedora and Arch Linux.
+## Install
 
-[![Version](https://img.shields.io/badge/version-2.5.0-red.svg)]() [![GitHub license](https://img.shields.io/github/license/trackmastersteve/alienfx.svg)](https://github.com/trackmastersteve/alienfx/tree/2.1.x/LICENSE) [![Python3](https://img.shields.io/badge/python-3.14-green.svg)]() [![GitHub issues](https://img.shields.io/github/issues/trackmastersteve/alienfx.svg)](https://github.com/trackmastersteve/alienfx/issues) [![GitHub stars](https://img.shields.io/github/stars/trackmastersteve/alienfx.svg)](https://github.com/trackmastersteve/alienfx/stargazers)  [![GitHub forks](https://img.shields.io/github/forks/trackmastersteve/alienfx.svg)](https://github.com/trackmastersteve/alienfx/network)
-
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com) Contributers needed! Please read [CONTRIBUTING.md](https://github.com/trackmastersteve/alienfx/blob/master/CONTRIBUTING.md) for further details. 
-
-![AlienFX](https://github.com/trackmastersteve/alienfx/blob/master/alienfx/data/pixmaps/alienfx.png)
-
-## Table of Contents
-
-- [Dependencies](#dependencies)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-
-## Dependencies
-
-AlienFX is written in Python and requires Python 3.14 or newer. It requires
-the following python packages to run:
-
-On Arch Linux:
+For a per-user Linux install, extract the release archive and run:
 
 ```sh
-      $ sudo pacman -S python-pyusb python-setuptools python-gobject python-cairo
+./install.sh
 ```
-    
-On Debian/Ubuntu/Mint/Kali: 
+
+This copies the app into `${XDG_DATA_HOME:-~/.local/share}/alienfx-studio`,
+creates a Python virtual environment there, installs the Python dependencies,
+and adds an AlienFX Studio entry to the user's applications menu. It does not
+use `sudo`, install a system service, or start automatically at login. The
+first install needs network access to download Python dependencies.
+
+When finished, use the **Quit** control in Studio to stop the local server.
+Uninstall with `uninstall.sh` from the installed app directory; saved palettes
+and controller settings under `~/.config/alienfx-studio` are preserved.
+
+To create a shareable source archive from this checkout:
 
 ```sh
-      $ sudo apt install libcairo2-dev python3-gi python3-gi-cairo python3-setuptools python3-usb
+./package-release.sh
 ```
 
-On Fedora: 
+The archive excludes virtual environments and build caches. An AppImage is
+possible, but this user-local archive install is simpler to audit and update;
+either format still relies on the host's USB device permissions.
+
+## Run From Source
+
+From this directory:
 
 ```sh
-      $ sudo dnf install cairo-devel python3-gobject cairo-gobject python3-setuptools python3-pyusb
+./run.sh
 ```
 
-## Installation
+The script creates `.venv` here and installs Flask, Waitress, and PyUSB into
+that environment. The controller package is already included in this project.
+The studio opens at `http://127.0.0.1:8765`; stop it with the Quit control or
+Ctrl+C.
 
-On Arch Linux you can install package from AUR: [alienfx](https://aur.archlinux.org/packages/alienfx/)
+The account running the studio still needs permission to access the AlienFX USB
+device. A missing PyUSB or controller error is shown as a disconnected state;
+the app does not run a zone scan.
 
-For manual installation of AlienFX, use the following commands:
-  
-  ```sh
-      $ sudo python setup.py install
-  ```
-  ```sh
-      $ sudo python setup.py install_data
-  ```
+### USB permissions
 
-Note that the second invocation is required to ensure that icon files etc. are
-properly installed.
+The bundled controller package includes
+`alienfx/data/etc/udev/rules.d/10-alienfx.rules`. If the studio detects the
+controller but reports `Access denied`, install or reload that rule and
+re-trigger only the 13 R3 device:
 
-The installation includes a udev rules file that allows AlienFX to access the 
-AlienFX USB controller on your computer without needing root permissions. If 
-you run the install commands without sudo, then the udev rules file will not 
-be installed. 
+```sh
+sudo udevadm control --reload-rules
+sudo udevadm trigger --action=add --subsystem-match=usb --attr-match=idVendor=187c --attr-match=idProduct=0529
+```
 
-## Usage
+Use `lsusb -d 187c:0529` to find the current bus/device number, then verify its
+`/dev/bus/usb/BBB/DDD` node has mode `666`. Restart the studio with
+`./run.sh` after the permission change. Do not run the studio itself as root.
 
-Lighting configurations are stored in "theme files", which are simple json
-files stored in ``$XDG_CONFIG_HOME/alienfx``. If ``XDG_CONFIG_HOME`` is not set, then
-``~/.config/alienfx`` is used. Both the CLI and GUI programs use these theme
-files, and the GUI program allows you to create new themes as well.
+## What It Does
 
-When the GTK interface is started without root privileges, the toolbar now
-includes an Authenticate action. It uses ``pkexec`` to prompt for credentials,
-then relaunches the GUI in root mode so hardware access can be performed from
-the elevated session.
+Discover contains 130 curated palettes. Color Lab supports one through ten
+shades and thirteen effect recipes. Recipes use the controller's native fixed
+and morph commands; tempo is 25–942, with higher values running more slowly.
+Device Check sends a read-only status request and can test a mapped zone
+temporarily. A zone test requires a complete theme applied from the studio and
+changes only the selected zone. Its eight-second timer ends the test window but
+does not send another hardware command; choose Restore selected zone when ready.
+Both test and zone restore avoid controller reset and permanent `SAVE` commands.
+Reapplying the full saved theme remains a separate explicit action.
 
-See the man page of alienfx ``$ man alienfx`` for the cli options supported. 
+The Alienware 13 R3 Touchpad zone is mapped, but BIOS or embedded-controller
+state may gate its lighting. Studio cannot query or change that firmware state;
+its touchpad test changes only that zone and never retries or resets it
+automatically.
 
-If you run the CLI-version of alienfx on a currently unsupported device, the program will ask you if you wish to perform a zonescan.
-Please consider using this feature to determine the correct zone-codes for your device.
-If you found the correct codes, please contribute to the project. - You'll find more information in Section [Contributing](#contributing) 
+## Tests
 
-Supported models and adding support for new models:
---------------------------------------------------
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m unittest discover -s tests -v
+```
 
-Please have a look at [devicelist](https://github.com/trackmastersteve/alienfx/blob/master/docs/Knowledgebase/Devicelist.md)
+Tests use a fake controller and do not send commands to hardware.
 
-## Contributing
+## Scope
 
-Please read [CONTRIBUTING.md](https://github.com/trackmastersteve/alienfx/blob/master/CONTRIBUTING.md) for further details. 
-
-## Further Informatin
-If you're looking for further information, have a look in docs/Knowledgebase
-
-## Disclaimer and License
-If you use this software, you use it AT YOUR OWN RISK.
-I and the contributing developers DO NOT accept responsibility for frying your AlienFX controller chip with this code.
-Haven't fried any yet, but this is just so we can sleep at night. ;)
-
-
-This software is licenced under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
-
-This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [GNU GPL]((https://www.gnu.org/licenses/gpl-3.0.html)) for more detail.
-
+The bundled `alienfx/` directory contains the existing controller
+implementation. Distribution packaging remains separate from the local run
+workflow.

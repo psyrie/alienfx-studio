@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="theme-color" content="#090a12">
+  <title>AlienFX Studio</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='studio.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='shade-picker.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='color-brightness.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='effect-filter.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='effects.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fast-effects.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='palette-editor.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='preset-edit.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='color-lab-extreme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='preview-performance.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='diagnostics.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='zone-results.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app-controls.css') }}">
+  <script src="{{ url_for('static', filename='studio.js') }}" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="AlienFX Studio home">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>ALIEN<span class="brand-light">FX</span><small>LIGHTING STUDIO</small></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view-target="discover"><span class="nav-icon">◈</span> Discover <span class="nav-count">50</span></button>
+        <button class="nav-item" data-view-target="create"><span class="nav-icon">✳</span> Color lab</button>
+        <button class="nav-item" data-view-target="diagnostics"><span class="nav-icon">⌁</span> Device check</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="device-card">
+        <div class="device-card-top"><span class="device-glyph">⌘</span><span class="connection-dot" id="connection-dot"></span></div>
+        <div class="device-name" id="device-name">Looking for controller…</div>
+        <div class="device-state" id="device-state">Checking local USB</div>
+        <div class="device-zones" id="device-zones"></div>
+      </div>
+      <div class="side-foot"><span class="local-lock">◆</span> PRIVATE · THIS DEVICE ONLY</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="crumb"><span>STUDIO</span><b>/</b><strong id="crumb-current">DISCOVER</strong></div>
+        <div class="top-actions"><span class="live-indicator"><i></i> LOCAL SESSION</span><span class="avatar">A</span><button class="quit-studio" id="quit-studio" type="button" title="Stop AlienFX Studio"><span aria-hidden="true">⏻</span><span class="quit-label">Quit</span></button></div>
+      </header>
+
+      <section class="view active" id="view-discover" data-view="discover">
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="eyebrow-spark">✦</span> YOUR LIGHTS, REIMAGINED</div>
+            <h1>Make the<br><em>weird</em> wonderful.</h1>
+            <p>Alien palettes for a world that never sits still. Preview the vibe, then send it to your machine.</p>
+            <div class="hero-stats"><div><strong>50</strong><span>CURATED PALETTES</span></div><i></i><div><strong>12</strong><span>EFFECT RECIPES</span></div></div>
+          </div>
+          <div class="hero-art" aria-label="Animated spectrum preview">
+            <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+            <div class="planet"><div class="planet-core"></div><span class="planet-glint"></span></div>
+            <div class="art-label label-one">XENO<br>FREQUENCY</div><div class="art-label label-two">∞  /  13</div>
+            <div class="art-spark spark-one">✦</div><div class="art-spark spark-two">✧</div>
+          </div>
+          <div class="hero-grain"></div>
+        </section>
+
+        <section class="section-head">
+          <div><div class="eyebrow muted-eyebrow">THE PALETTE UNIVERSE</div><h2>Find your frequency<span class="heading-dot">.</span></h2></div>
+          <div class="result-count"><strong id="result-count">50</strong> <span>signals</span></div>
+        </section>
+        <div class="toolbar">
+          <label class="search-box"><span>⌕</span><input id="theme-search" type="search" placeholder="Search colors, moods, names…" autocomplete="off"><kbd>/</kbd></label>
+          <label class="effect-filter"><span>Effect</span><select id="effect-filter" aria-label="Filter by effect">
+            <option value="All">All effects</option>
+            <option value="fixed">Fixed</option>
+            <option value="blink">Blink</option>
+            <option value="morph">Morph</option>
+            <option value="breathe">Breathe</option>
+            <option value="ripple">Ripple</option>
+            <option value="spectrum">Spectrum</option>
+            <option value="pulse">Pulse</option>
+            <option value="comet">Comet</option>
+            <option value="orbit">Orbit</option>
+            <option value="prism">Prism</option>
+            <option value="polyphase">Polyphase</option>
+            <option value="aurora">Aurora</option>
+            <option value="shimmer">Shimmer</option>
+          </select></label>
+          <div class="filter-list" id="filter-list" aria-label="Filter palettes">
+            <button class="filter-chip selected" data-filter="All">All <span>50</span></button>
+            <button class="filter-chip" data-filter="Alien">Alien</button>
+            <button class="filter-chip" data-filter="Psychedelic">Psychedelic</button>
+            <button class="filter-chip" data-filter="Cosmic">Cosmic</button>
+            <button class="filter-chip" data-filter="Vaporwave">Vaporwave</button>
+            <button class="filter-chip" data-filter="Bioluminescent">Bioluminescent</button>
+          </div>
+        </div>
+        <div class="preset-grid" id="preset-grid" aria-live="polite"></div>
+        <div class="empty-state hidden" id="empty-state"><span>✧</span><strong>No signals found</strong><p>Try a different search or mood filter.</p></div>
+      </section>
+
+      <section class="view create-view" id="view-create" data-view="create">
+        <div class="create-heading"><div class="eyebrow muted-eyebrow">EXPERIMENT WITHOUT LIMITS</div><h1>Color <em>lab.</em></h1><p>Build a custom spectrum. Every shade is translated to your controller's native color range.</p></div>
+        <div class="lab-layout">
+          <section class="lab-panel">
+            <div class="lab-mode-bar">
+              <div class="lab-mode-switch" role="group" aria-label="Color Lab mode">
+                <button class="lab-mode-option selected" type="button" data-lab-mode="standard" aria-pressed="true">Standard</button>
+                <button class="lab-mode-option" type="button" data-lab-mode="extreme" aria-pressed="false">Extreme</button>
+              </div>
+              <button class="wild-palette-command hidden" id="generate-wild-palette" type="button">Generate wild mix</button>
+            </div>
+            <div class="extreme-notice hidden" id="extreme-notice" role="status" aria-live="polite"></div>
+            <div class="panel-heading"><div><span class="step">01</span><h2>Choose your colors</h2></div><span class="panel-note">RGB + BRIGHTNESS</span></div>
+            <div class="shade-controls" role="group" aria-label="Palette shade count">
+              <button class="shade-count-button" id="remove-shade" type="button" aria-label="Remove shade" title="Remove shade">-</button>
+              <output id="shade-count" aria-live="polite">5 / 10</output>
+              <button class="shade-count-button" id="add-shade" type="button" aria-label="Add shade" title="Add shade">+</button>
+            </div>
+            <div class="color-pickers">
+              <div class="color-control"><label class="color-swatch"><input type="color" class="custom-color" value="#7c3aed" aria-label="First custom color"><span>01</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 1"></div>
+              <div class="color-control"><label class="color-swatch"><input type="color" class="custom-color" value="#00e5ff" aria-label="Second custom color"><span>02</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 2"></div>
+              <div class="color-control"><label class="color-swatch"><input type="color" class="custom-color" value="#d7ff3f" aria-label="Third custom color"><span>03</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 3"></div>
+              <div class="color-control"><label class="color-swatch"><input type="color" class="custom-color" value="#ff4dc4" aria-label="Fourth custom color"><span>04</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 4"></div>
+              <div class="color-control"><label class="color-swatch"><input type="color" class="custom-color" value="#ffcf5a" aria-label="Fifth custom color"><span>05</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 5"></div>
+              <div class="color-control" hidden><label class="color-swatch"><input type="color" class="custom-color" value="#ff8a65" aria-label="Sixth custom color"><span>06</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 6"></div>
+              <div class="color-control" hidden><label class="color-swatch"><input type="color" class="custom-color" value="#a3e635" aria-label="Seventh custom color"><span>07</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 7"></div>
+              <div class="color-control" hidden><label class="color-swatch"><input type="color" class="custom-color" value="#2dd4bf" aria-label="Eighth custom color"><span>08</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 8"></div>
+              <div class="color-control" hidden><label class="color-swatch"><input type="color" class="custom-color" value="#818cf8" aria-label="Ninth custom color"><span>09</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 9"></div>
+              <div class="color-control" hidden><label class="color-swatch"><input type="color" class="custom-color" value="#f8fafc" aria-label="Tenth custom color"><span>10</span></label><div class="brightness-label"><span>BRI</span><output class="brightness-value">100%</output></div><input type="range" class="custom-brightness" min="0" max="100" value="100" aria-label="Brightness for color 10"></div>
+            </div>
+            <div class="palette-library">
+              <div class="palette-load-row">
+                <label class="palette-field" for="palette-source">BASELINE OR SAVED PALETTE<select id="palette-source"><option value="">Choose a palette</option></select></label>
+                <button class="palette-command" id="load-palette-source" type="button" disabled>Load</button>
+              </div>
+              <label class="palette-field" for="palette-name">PALETTE NAME<input id="palette-name" type="text" maxlength="60" placeholder="Name this palette" autocomplete="off"></label>
+              <div class="palette-actions">
+                <button class="palette-command primary" id="save-palette-new" type="button">Save as new</button>
+                <button class="palette-command" id="save-palette-changes" type="button" disabled>Save changes</button>
+                <button class="palette-command danger" id="delete-palette" type="button" disabled aria-label="Delete selected saved palette">Delete</button>
+              </div>
+            </div>
+            <div class="panel-heading effect-heading"><div><span class="step">02</span><h2>Set the motion</h2></div><span class="panel-note">DEVICE-SUPPORTED</span></div>
+            <div class="effect-options">
+              <label class="effect-option selected"><input type="radio" name="effect" value="morph" checked><span class="effect-symbol morph-symbol">↝</span><span><strong>Morph</strong><small>Drift between two colors</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="breathe"><span class="effect-symbol morph-symbol">◌</span><span><strong>Breathe</strong><small>Fade into darkness and return</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="ripple"><span class="effect-symbol morph-symbol">〰</span><span><strong>Ripple</strong><small>Offset color drift by zone</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="spectrum"><span class="effect-symbol morph-symbol">✳</span><span><strong>Spectrum</strong><small>Cycle through the palette</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="pulse"><span class="effect-symbol morph-symbol">◌</span><span><strong>Pulse</strong><small>Smoothly ease between bright and dim</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="blink"><span class="effect-symbol morph-symbol">⌁</span><span><strong>Blink</strong><small>Soft fade to dark and return</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="comet"><span class="effect-symbol morph-symbol">☄</span><span><strong>Comet</strong><small>Phase-shifted fade trails</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="orbit"><span class="effect-symbol morph-symbol">⟳</span><span><strong>Orbit</strong><small>Color paths offset across zones</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="prism"><span class="effect-symbol morph-symbol">◈</span><span><strong>Prism</strong><small>Long-range colors glide together</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="polyphase"><span class="effect-symbol morph-symbol">≋</span><span><strong>Polyphase</strong><small>Independent zone cycles drift apart</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="aurora"><span class="effect-symbol morph-symbol">≋</span><span><strong>Aurora</strong><small>Flow colors in alternating directions</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="shimmer"><span class="effect-symbol morph-symbol">✧</span><span><strong>Shimmer</strong><small>Soft color and brightness variation</small></span><i></i></label>
+              <label class="effect-option"><input type="radio" name="effect" value="fixed"><span class="effect-symbol fixed-symbol">◉</span><span><strong>Fixed</strong><small>Hold a steady glow</small></span><i></i></label>
+            </div>
+            <div class="speed-control"><div><label for="speed-range">Effect tempo</label><span id="speed-value">75</span></div><input id="speed-range" type="range" min="50" max="942" value="75"><div class="range-labels"><span id="tempo-range-label">50-942 · lower is faster</span></div></div>
+            <button class="apply-custom" id="apply-custom"><span>Apply custom spectrum</span><b>↗</b></button>
+          </section>
+          <aside class="preview-panel">
+            <div class="preview-caption"><span>LIVE PREVIEW</span><span class="preview-pulse"><i></i> SIMULATED</span></div>
+            <div class="preview-stage" id="custom-preview"><div class="preview-halo"></div><div class="preview-device"><div class="device-screen"><div class="mini-logo">✦</div></div><div class="keyboard-row"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="keyboard-row offset"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="keyboard-row"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="trackpad"></div></div><div class="preview-name">YOUR SPECTRUM</div></div>
+            <div class="preview-foot"><span>PREVIEW ONLY</span><p>Applying writes lighting profiles to the controller.</p></div>
+          </aside>
+        </div>
+        <div class="capability-note"><span>i</span><p>These thirteen recipes use native fixed and morph sequences. Each zone has its own loop, and the controller starts them together when applied; the app does not stream animation over USB.</p></div>
+      </section>
+
+      <section class="view diagnostics-view" id="view-diagnostics" data-view="diagnostics">
+        <div class="create-heading"><div class="eyebrow muted-eyebrow">KNOWN DEVICE · CONTROLLED TESTS</div><h1>Device <em>check.</em></h1><p>Confirm the USB link, then test only zones explicitly mapped for the detected controller.</p></div>
+        <div class="diagnostic-status-card">
+          <div class="diagnostic-orb" id="probe-orb">⌁</div>
+          <div class="diagnostic-status-copy"><span class="panel-note">CONTROLLER LINK</span><strong id="probe-result">Not checked yet</strong><p id="probe-detail">The status probe sends GET_STATUS only. It does not reset or change lighting.</p></div>
+          <button class="secondary-action" id="probe-controller" type="button">Probe controller <b>↗</b></button>
+        </div>
+        <section class="diagnostic-panel">
+          <div class="section-head diagnostic-head"><div><div class="eyebrow muted-eyebrow">TEMPORARY ZONE ISOLATION</div><h2>Which light responds<span class="heading-dot">?</span></h2></div><span class="result-count" id="restore-profile-label">Restore profile: checking</span></div>
+          <div class="diagnostic-warning"><span>!</span><p>A test changes only the selected zone; other mapped zones are untouched. It does not reset the controller or send permanent SAVE. The 8-second timer only ends the test window: the test color stays until you choose Restore selected zone. Apply a theme here first to provide a saved color for that zone.</p></div>
+          <div class="zone-test-controls">
+            <label class="field-label" for="zone-select">ZONE TO TEST<select id="zone-select" disabled><option>Detecting controller…</option></select></label>
+            <label class="field-label color-field" for="zone-test-color">TEST COLOR<input id="zone-test-color" type="color" value="#ffffff" aria-label="Temporary zone-test color"></label>
+            <button class="apply-custom" id="run-zone-test" type="button" disabled><span>Start 8-second test</span><b>↗</b></button>
+            <button class="secondary-action restore-action" id="restore-zone-test" type="button" disabled>Reapply saved theme</button>
+          </div>
+          <div class="test-countdown hidden" id="test-countdown" role="status" aria-live="polite"></div>
+          <div class="zone-feedback hidden" id="zone-feedback" role="group" aria-label="Zone test result">
+            <p id="zone-feedback-question">Did the selected zone illuminate?</p>
+            <button type="button" data-zone-result="yes">Yes, it lit</button>
+            <button type="button" data-zone-result="no">No response</button>
+          </div>
+          <div class="zone-map-wrap"><div class="panel-note">MAPPED HARDWARE ZONES</div><div class="zone-map" id="zone-map"><div class="zone-placeholder">Waiting for controller information…</div></div></div>
+          <div class="touchpad-note"><span>✦</span><p><strong>Touchpad light not responding?</strong> On the 13 R3, BIOS or embedded-controller state may gate this zone. If toggling the BIOS setting temporarily revives it, that points to firmware state; Studio has no documented command to change that setting or reinitialize the touchpad safely. This test targets only the touchpad and never retries or resets automatically.</p></div>
+        </section>
+        <div class="capability-note"><span>i</span><p>Diagnostics never scan arbitrary USB devices, try unknown zone codes, or send unexplained packets. If the read-only status check succeeds but a specific zone does not react, that helps isolate a zone-map, BIOS, or controller-state issue.</p></div>
+      </section>
+      <footer class="page-footer"><span>ALIENFX STUDIO <b>·</b> BUILT FOR THE UNUSUAL</span><span>DESIGNED TO GLOW DIFFERENT</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

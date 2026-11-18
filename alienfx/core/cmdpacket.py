@@ -2,7 +2,7 @@
 # cmdpacket.py
 #
 # Copyright (C) 2013-2014 Ashwin Menon <ashwin.menon@gmail.com>
-# Copyright (C) 2015-2026 Track Master Steve <trackmastersteve@gmail.com>
+# Copyright (C) 2015-2024 Track Master Steve <trackmastersteve@gmail.com>
 #
 # Alienfx is free software.
 #
@@ -37,6 +37,8 @@ This module provides the following classes:
 AlienFXCmdPacket: base class for AlienFX command packets
 """
 
+from builtins import hex
+from builtins import object
 
 class AlienFXCmdPacket(object):
 

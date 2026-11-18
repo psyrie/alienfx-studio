@@ -2,7 +2,7 @@
 # controller.py
 #
 # Copyright (C) 2013-2014 Ashwin Menon <ashwin.menon@gmail.com>
-# Copyright (C) 2015-2026 Track Master Steve <trackmastersteve@gmail.com>
+# Copyright (C) 2015-2024 Track Master Steve <trackmastersteve@gmail.com>
 #
 # Alienfx is free software.
 #
@@ -30,6 +30,8 @@ This module provides the following classes:
 AlienFXController: base class for AlienFX controller chips
 """
 
+from builtins import hex
+from builtins import object
 import logging
 
 import alienfx.core.usbdriver as alienfx_usbdriver
@@ -58,7 +60,6 @@ class AlienFXController(object):
     ZONE_RIGHT_SPEAKER = "Right Speaker"
     ZONE_LEFT_SPEAKER = "Left Speaker"
     ZONE_ALIEN_HEAD = "Alien Head"
-    ZONE_LEFT_SIDE = "Left Side"
     ZONE_LOGO = "Logo"
     ZONE_TOUCH_PAD = "Touchpad"
     ZONE_MEDIA_BAR = "Media Bar"
@@ -147,21 +148,18 @@ class AlienFXController(object):
         """ Keep sending a "get status" packet to the AlienFX controller and 
         return only when the controller is ready
         """
-        ready = False
-        errcount=0
-        while not ready:
+        for attempt in range(50):
             pkt = self.cmd_packet.make_cmd_get_status()
             logging.debug("SENDING: {}".format(self.pkt_to_string(pkt)))
             self._driver.write_packet(pkt)
-            try:
-                resp = self._driver.read_packet()
-                ready = bool(resp) and (resp[0] == self.cmd_packet.STATUS_READY)
-            except TypeError:
-                errcount += 1
-                logging.debug("No Status received yet... Failed tries=" + str(errcount))
-            if errcount > 50:
-                logging.error("Controller status could not be retrieved. Is the device already in use?")
-                quit(-99)
+            response = self._driver.read_packet()
+            if response and response[0] == self.cmd_packet.STATUS_READY:
+                return
+            logging.debug("Controller not ready; attempt %s", attempt + 1)
+        raise RuntimeError(
+            "Controller did not become ready after 50 status requests. "
+            "Check USB permissions and whether another application is using it."
+        )
         
     def pkt_to_string(self, pkt_bytes):
         """ Return a human readable string representation of an AlienFX
@@ -223,12 +221,14 @@ class AlienFXController(object):
                 logging.warning("unknown loop item type: {}".format(item_type))
         return loop_cmds
         
-    def _make_zone_cmds(self, themefile, state_name, boot=False):
+    def _make_zone_cmds(self, themefile, state_name, boot=False, persist=True):
         """ Given a theme file, return a list of zone commands.
         
         If 'boot' is True, then the colour commands created are not saved with
         SAVE_NEXT commands. Also, the final command is one to set the colour
-        of all non-visible zones to black.
+        of all non-visible zones to black. If 'persist' is False, state slots
+        are staged in controller memory but the permanent SAVE command is not
+        sent; those staged settings are lost on controller reboot.
         """
         zone_cmds = []
         block = 1
@@ -250,7 +250,7 @@ class AlienFXController(object):
                     zone_cmds.append(pkt.make_cmd_save_next(state))
                 zone_cmds.append(pkt.make_cmd_loop_block_end())
         if zone_cmds:
-            if not boot:
+            if not boot and persist:
                 zone_cmds.append(pkt.make_cmd_save())
         if boot:
             zone_cmds.append(
@@ -265,28 +265,31 @@ class AlienFXController(object):
             logging.debug("SENDING: {}".format(self.pkt_to_string(cmd)))
             self._driver.write_packet(cmd)
 
-    def set_theme(self, themefile):
+    def set_theme(self, themefile, persist=True, reset=True):
         """ Send the given theme settings to the controller. This should result
-        in the lights changing to the theme settings immediately.
+        in the lights changing to the theme settings immediately. Set persist
+        to False for temporary diagnostics that must not send permanent SAVE.
+        Set reset to False to skip controller reset during temporary changes.
         """
         try:
             self._driver.acquire()
             cmds_boot = []
             pkt = self.cmd_packet
             
-            # prepare the controller
-            self._ping()
-            self._reset("all-lights-on")
-            self._wait_controller_ready()
+            if reset:
+                self._ping()
+                self._reset("all-lights-on")
+                self._wait_controller_ready()
             
             for state_name in self.state_map:
                 cmds = []
-                cmds = self._make_zone_cmds(themefile, state_name)
+                cmds = self._make_zone_cmds(
+                    themefile, state_name, persist=persist)
                 # Boot block commands are saved for sending again later.
                 # The second time, they are sent without SAVE_NEXT commands.
                 if (state_name == self.STATE_BOOT):
                     cmds_boot = self._make_zone_cmds(
-                        themefile, state_name, boot=True)
+                        themefile, state_name, boot=True, persist=persist)
                 self._send_cmds(cmds)
             cmd = pkt.make_cmd_set_speed(themefile.get_speed())
             self._send_cmds([cmd])

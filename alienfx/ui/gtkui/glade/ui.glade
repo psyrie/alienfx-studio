@@ -157,20 +157,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton_authenticate">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Authenticate and relaunch AlienFX in root mode</property>
-                <property name="label" translatable="yes">Start Daemon</property>
-                <property name="use_underline">True</property>
-                <signal name="clicked" handler="on_action_authenticate_activate" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkToolButton" id="toolbutton_apply">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -579,7 +565,7 @@
       <column type="GObject"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="saveas_theme_list_store">
+  <object class="GtkListStore" id="saveas_theme_list store">
     <columns>
       <!-- column-name Theme -->
       <column type="gchararray"/>
@@ -648,7 +634,7 @@
               <object class="GtkTreeView" id="saveas_theme_list_view">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="model">saveas_theme_list_store</property>
+                <property name="model">saveas_theme_list store</property>
                 <signal name="row-activated" handler="on_saveas_theme_list_view_row_activated" swapped="no"/>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection4"/>
